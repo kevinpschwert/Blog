@@ -1,0 +1,181 @@
+﻿@model IEnumerable<BlogSite.Models.BlogPost>
+
+
+@{
+    Layout = null;
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kevin Schwert's Blog</title>
+    <meta name="description" content="Draggable Dual-View Slideshow: A Slideshow with two views and content area" />
+    <meta name="keywords" content="draggable, slideshow, fullscreen, carousel, views, zoomed, 3d transform, perspective, dragdealer" />
+    <meta name="author" content="Codrops" />
+    <link rel="shortcut icon" href="~/favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Playfair+Display:900,400|Lato:300,400,700' rel='stylesheet' type='text/css'>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="~/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/demo.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/dragdealer.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/component.css" />
+    <script src="~/js/modernizr.custom.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="codrops-top clearfix">
+            @using Microsoft.AspNet.Identity
+            <a class="codrops-icon codrops-icon-prev">
+                <div>
+                    <div class="navbar-header">
+                        <a href="http://kschwert-portfolio.azurewebsites.net/" target="_blank">Portfolio</a>
+                    </div>
+                    @if (Request.IsAuthenticated)
+            {
+                using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                {
+                            @Html.AntiForgeryToken()
+
+                            <div class="nav navbar-nav navbar-right">
+                                @*@{
+                                        var manager = new UserManager<ApplicationUser>(new Microsoft.AspNet.Identity.EntityFramework.UserStore<ApplicationUser>(new ApplicationDbContext()));
+                                        var currentUser = manager.FindById(User.Identity.GetUserId());
+                                    }*@
+
+                                @Html.ActionLink("Hello " + User.Identity.GetUserName() + "!", "Index", "Manage", routeValues: null, htmlAttributes: new { title = "Manage" })
+
+                                <a href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="nav navbar-nav navbar-right">
+                            @Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })
+                            @Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })
+                        </div>
+                    }
+                </div>
+            </a>
+        </div>
+        @foreach (var item in Model)
+        {
+            using (Html.BeginForm("Details", "BlogPosts", new { slug = item.Slug }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <header id="header" class="codrops-header">
+                    <h1>Draggable Dual-View Slideshow</h1>
+                    <span class="message">This mobile version does not have the slideshow switch</span>
+                    <button class="slider-switch">Switch view</button>
+                </header>
+                <div id="overlay" class="overlay">
+                    <div class="info">
+                        <h1 style="font-size:66px;">You Should Buy Me Lunch Today</h1>
+                        <h3>Welcome to my Blog</h3>
+                        <button type="submit">Enter</button>
+
+                        @*<div class="container">
+
+                                <!-- Trigger the modal with a button -->
+                                <button type="button" data-toggle="modal" data-target="#myModal">About</button>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="myModal" role="dialog">
+                                    <div class="modal-dialog">
+
+                                        <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                                            </div>
+                                            <div class="modal-body">
+                                                <h4 style="text-wrap:normal">lakjdsfljkasldfjklajksdfljkalsdjkf;lakjsdl;fkjalsdkjfl;akjsdfl;kjasldfjklasdkjflakjsdflkjasdlfkjlasdkjfl;kajsdlf;kjalsdkjflaksjdf;lkjasdlfkhlkasdfhlkjasd;lfkuoqwiuerlkjasdlfhlkhasdlkfj;lkjasdf</h4>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" data-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>*@
+                        @{if (User.IsInRole("Admin"))
+                    {
+
+                                <center>@Html.ActionLink("Create New", "Create", "BlogPosts")</center>
+                            }
+                        }
+                    </div>
+                </div>
+                                }
+                            }
+
+        @*}*@
+    </div><!-- /container -->
+    @*<div class="container">
+            <div class="row">
+                <center><h1 style="color:white">Bob!!!</h1></center>
+            </div>
+        </div>*@
+    <script src="~/js/dragdealer.js"></script>
+    <script src="~/js/classie.js"></script>
+    <script src="~/js/dragslideshow.js"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script>
+        (function () {
+
+            var overlay = document.getElementById('overlay'),
+                overlayClose = overlay.querySelector('button'),
+                header = document.getElementById('header')
+            switchBtnn = header.querySelector('button.slider-switch'),
+            toggleBtnn = function () {
+                if (slideshow.isFullscreen) {
+                    classie.add(switchBtnn, 'view-maxi');
+                }
+                else {
+                    classie.remove(switchBtnn, 'view-maxi');
+                }
+            },
+            toggleCtrls = function () {
+                if (!slideshow.isContent) {
+                    classie.add(header, 'hide');
+                }
+            },
+            toggleCompleteCtrls = function () {
+                if (!slideshow.isContent) {
+                    classie.remove(header, 'hide');
+                }
+            },
+            slideshow = new DragSlideshow(document.getElementById('slideshow'), {
+                // toggle between fullscreen and minimized slideshow
+                onToggle: toggleBtnn,
+                // toggle the main image and the content view
+                onToggleContent: toggleCtrls,
+                // toggle the main image and the content view (triggered after the animation ends)
+                onToggleContentComplete: toggleCompleteCtrls
+            }),
+            toggleSlideshow = function () {
+                slideshow.toggle();
+                toggleBtnn();
+            },
+            closeOverlay = function () {
+                classie.add(overlay, 'hide');
+            };
+
+            // toggle between fullscreen and small slideshow
+            switchBtnn.addEventListener('click', toggleSlideshow);
+            // close overlay
+            overlayClose.addEventListener('click', closeOverlay);
+
+        }());
+    </script>
+</body>
+</html>
